@@ -1,0 +1,47 @@
+# --- Initialization ---
+units       lj
+boundary    p p p 
+
+atom_style  angle
+pair_style  lj/cut 1.12246
+pair_modify shift yes
+bond_style fene 
+angle_style harmonic
+
+# --- Read structure ---
+read_data   data.relaxation
+
+# --- Bonded Interactions ---
+bond_coeff 1 30.0 1.5 1.0 1.0
+bond_coeff 2 30.0 1.5 1.0 1.0
+angle_coeff 1 1.0 180.0
+angle_coeff 2 60.0 180.0
+
+pair_coeff * * 1.0 1.0
+
+# --- Neighbor setup ---
+neigh_modify delay 10
+
+# --- Velocity Initialization & Dynamics ---
+velocity all create 1.0 12345 rot yes dist gaussian
+
+fix integrator all nve
+fix thermostat all langevin 1.0 1.0 100.0 12345
+
+# --- Output settings ---
+thermo_style multi
+thermo 500
+
+# --- Dump unwrapped coordinates for python analysis ---
+dump 1 all atom 1000 dump.task
+dump_modify 1 scale yes
+
+# Run simulation
+run 100000
+
+# --- Save final configuration ---
+write_data data.task
+
+
+
+print "Simulation done"
